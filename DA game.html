@@ -229,18 +229,14 @@
       lasers.push({ el: laser, x: chaser.x + 20, y: chaser.y + 20, vx, vy });
     }
 
-        function moveLasers() {
+    function moveLasers() {
       lasers.forEach((laser, index) => {
-        laser.x += laser.vx;
+        lase r.x += laser.vx;
         laser.y += laser.vy;
         laser.el.style.left = laser.x + "px";
         laser.el.style.top = laser.y + "px";
 
-        // Bounce off screen edges
-        if (laser.x <= 0 || laser.x >= window.innerWidth - 10) laser.vx = -laser.vx;
-        if (laser.y <= 0 || laser.y >= window.innerHeight - 10) laser.vy = -laser.vy;
-
-        // Deflect off shield
+        // Deflect laser if it hits shield
         const shieldX = parseFloat(shield.style.left);
         const shieldY = parseFloat(shield.style.top);
         const shieldWidth = 6;
@@ -256,7 +252,7 @@
           laser.vy = -laser.vy;
         }
 
-        // Hit player
+                // Hit player
         if (
           laser.x > playerX &&
           laser.x < playerX + 50 &&
@@ -265,22 +261,6 @@
         ) {
           endGame();
         }
-
-        // Hit chaser
-        chasers.forEach(chaser => {
-          if (!chaser.active) return;
-          if (
-            laser.x > chaser.x &&
-            laser.x < chaser.x + 50 &&
-            laser.y > chaser.y &&
-            laser.y < chaser.y + 50
-          ) {
-            chaser.el.remove();
-            chaser.active = false;
-            laser.el.remove();
-            lasers.splice(index, 1);
-          }
-        });
       });
     }
 
@@ -362,3 +342,5 @@
   </script>
 </body>
 </html>
+
+        if
