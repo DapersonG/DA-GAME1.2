@@ -236,12 +236,16 @@
         laser.el.style.left = laser.x + "px";
         laser.el.style.top = laser.y + "px";
 
-        // Deflect laser if it hits shield
+        // Bounce off screen edges
+        if (laser.x <= 0 || laser.x >= window.innerWidth - 10) laser.vx = -laser.vx;
+        if (laser.y <= 0 || laser.y >= window.innerHeight - 10) laser.vy = -laser.vy;
+
+        // Deflect off shield
         const shieldX = parseFloat(shield.style.left);
         const shieldY = parseFloat(shield.style.top);
         const shieldWidth = 6;
-        const shieldHeight = 60;
-
+        const shieldHeight = 60
+                // Deflect off shield
         if (
           laser.x < shieldX + shieldWidth &&
           laser.x + 10 > shieldX &&
@@ -261,84 +265,21 @@
         ) {
           endGame();
         }
+
+        // Hit chaser
+        chasers.forEach(chaser => {
+          if (!chaser.active) return;
+          if (
+            laser.x > chaser.x &&
+            laser.x < chaser.x + 50 &&
+            laser.y > chaser.y &&
+            laser.y < chaser.y + 50
+          ) {
+            chaser.el.remove();
+            chaser.active = false;
+            laser.el.remove();
+            lasers.splice(index, 1);
+          }
+        });
       });
     }
-
-    function moveChasers() {
-      chasers.forEach(chaser => {
-        if (!chaser.active || !gameRunning) return;
-        const dx = playerX - chaser.x;
-        const dy = playerY - chaser.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist > 1) {
-          chaser.x += (dx / dist) * 2;
-          chaser.y += (dy / dist) * 2;
-        }
-        chaser.el.style.left = chaser.x + "px";
-        chaser.el.style.top = chaser.y + "px";
-
-        // Collision with player
-        if (
-          playerX < chaser.x + 50 &&
-          playerX + 50 > chaser.x &&
-          playerY < chaser.y + 50 &&
-          playerY + 50 > chaser.y
-        ) {
-          endGame();
-        }
-
-        // Collision with shield
-        const shieldX = parseFloat(shield.style.left);
-        const shieldY = parseFloat(shield.style.top);
-        const shieldWidth = 6;
-        const shieldHeight = 60;
-
-        if (
-          chaser.x < shieldX + shieldWidth &&
-          chaser.x + 50 > shieldX &&
-          chaser.y < shieldY + shieldHeight &&
-          chaser.y + 50 > shieldY
-        ) {
-          chaser.el.remove();
-          chaser.active = false;
-        }
-      });
-    }
-
-    function endGame() {
-      gameRunning = false;
-      player.style.display = "none";
-      shield.style.display = "none";
-      const score = Math.floor((Date.now() - startTime) / 1000);
-      leaderboard.push({ name: username, score });
-      leaderboard.sort((a, b) => b.score - a.score);
-      leaderboard = leaderboard.slice(0, 5);
-      localStorage.setItem("leaderboard", JSON.stringify(leaderboard));
-
-      const boardHTML = leaderboard
-        .map((entry, i) => `<div>${i + 1}. ${entry.name} - ${entry.score}s</div>`)
-        .join("");
-
-      gameOver.innerHTML = `
-        <div>Game Over</div>
-        <div>Your score: ${score}s</div>
-        <h3>Leaderboard</h3>
-        ${boardHTML}
-        <button id="retryBtn">Retry</button>
-      `;
-
-      document.getElementById("retryBtn").onclick = () => location.reload();
-      gameOver.style.display = "flex";
-    }
-
-    function gameLoop() {
-      movePlayer();
-      moveChasers();
-      moveLasers();
-      updatePlayer();
-      updateShield();
-      if (gameRunning) requestAnimationFrame(gameLoop);
-    }
-  </script>
-</body>
-</html>
