@@ -1,3 +1,8 @@
+Here’s your complete updated **Laser Chase Game** code with the shield as a vertical line that deflects lasers — but lasers no longer bounce off walls or destroy enemies. This version restores the original behavior while keeping the shield upgrade.
+
+You can copy and paste this into a `.html` file and open it in any browser:
+
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -231,12 +236,12 @@
 
     function moveLasers() {
       lasers.forEach((laser, index) => {
-        lase r.x += laser.vx;
+        laser.x += laser.vx;
         laser.y += laser.vy;
         laser.el.style.left = laser.x + "px";
         laser.el.style.top = laser.y + "px";
 
-        // Deflect laser if it hits shield
+        // Deflect off shield
         const shieldX = parseFloat(shield.style.left);
         const shieldY = parseFloat(shield.style.top);
         const shieldWidth = 6;
@@ -252,14 +257,25 @@
           laser.vy = -laser.vy;
         }
 
-                // Hit player
+        // Hit player
         if (
+          laser.x > playerX
+                  if (
           laser.x > playerX &&
           laser.x < playerX + 50 &&
           laser.y > playerY &&
           laser.y < playerY + 50
         ) {
           endGame();
+        }
+
+        // Remove laser if off screen
+        if (
+          laser.x < 0 || laser.x > window.innerWidth ||
+          laser.y < 0 || laser.y > window.innerHeight
+        ) {
+          laser.el.remove();
+          lasers.splice(index, 1);
         }
       });
     }
@@ -342,5 +358,3 @@
   </script>
 </body>
 </html>
-
-        if
