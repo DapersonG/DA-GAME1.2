@@ -229,7 +229,7 @@
       lasers.push({ el: laser, x: chaser.x + 20, y: chaser.y + 20, vx, vy });
     }
 
-    function moveLasers() {
+        function moveLasers() {
       lasers.forEach((laser, index) => {
         laser.x += laser.vx;
         laser.y += laser.vy;
@@ -244,8 +244,8 @@
         const shieldX = parseFloat(shield.style.left);
         const shieldY = parseFloat(shield.style.top);
         const shieldWidth = 6;
-        const shieldHeight = 60
-                // Deflect off shield
+        const shieldHeight = 60;
+
         if (
           laser.x < shieldX + shieldWidth &&
           laser.x + 10 > shieldX &&
@@ -283,3 +283,82 @@
         });
       });
     }
+
+    function moveChasers() {
+      chasers.forEach(chaser => {
+        if (!chaser.active || !gameRunning) return;
+        const dx = playerX - chaser.x;
+        const dy = playerY - chaser.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist > 1) {
+          chaser.x += (dx / dist) * 2;
+          chaser.y += (dy / dist) * 2;
+        }
+        chaser.el.style.left = chaser.x + "px";
+        chaser.el.style.top = chaser.y + "px";
+
+        // Collision with player
+        if (
+          playerX < chaser.x + 50 &&
+          playerX + 50 > chaser.x &&
+          playerY < chaser.y + 50 &&
+          playerY + 50 > chaser.y
+        ) {
+          endGame();
+        }
+
+        // Collision with shield
+        const shieldX = parseFloat(shield.style.left);
+        const shieldY = parseFloat(shield.style.top);
+        const shieldWidth = 6;
+        const shieldHeight = 60;
+
+        if (
+          chaser.x < shieldX + shieldWidth &&
+          chaser.x + 50 > shieldX &&
+          chaser.y < shieldY + shieldHeight &&
+          chaser.y + 50 > shieldY
+        ) {
+          chaser.el.remove();
+          chaser.active = false;
+        }
+      });
+    }
+
+    function endGame() {
+      gameRunning = false;
+      player.style.display = "none";
+      shield.style.display = "none";
+      const score = Math.floor((Date.now() - startTime) / 1000);
+      leaderboard.push({ name: username, score });
+      leaderboard.sort((a, b) => b.score - a.score);
+      leaderboard = leaderboard.slice(0, 5);
+      localStorage.setItem("leaderboard", JSON.stringify(leaderboard));
+
+      const boardHTML = leaderboard
+        .map((entry, i) => `<div>${i + 1}. ${entry.name} - ${entry.score}s</div>`)
+        .join("");
+
+      gameOver.innerHTML = `
+        <div>Game Over</div>
+        <div>Your score: ${score}s</div>
+        <h3>Leaderboard</h3>
+        ${boardHTML}
+        <button id="retryBtn">Retry</button>
+      `;
+
+      document.getElementById("retryBtn").onclick = () => location.reload();
+      gameOver.style.display = "flex";
+    }
+
+    function gameLoop() {
+      movePlayer();
+      moveChasers();
+      moveLasers();
+      updatePlayer();
+      updateShield();
+      if (gameRunning) requestAnimationFrame(gameLoop);
+    }
+  </script>
+</body>
+</html>
