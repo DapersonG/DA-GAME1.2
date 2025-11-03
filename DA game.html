@@ -37,8 +37,8 @@
     }
     #shield {
       position: absolute;
-      width: 60px;
-      height: 6px;
+      width: 6px;
+      height: 60px;
       background-color: rgba(0, 0, 255, 0.6);
       z-index: 1;
       pointer-events: none;
@@ -191,8 +191,8 @@
     function updateShield() {
       const angle = Math.atan2(mouseY - (playerY + 25), mouseX - (playerX + 25));
       const distance = 40;
-      const shieldX = playerX + 25 + Math.cos(angle) * distance - 30;
-      const shieldY = playerY + 25 + Math.sin(angle) * distance - 3;
+      const shieldX = playerX + 25 + Math.cos(angle) * distance - 3;
+      const shieldY = playerY + 25 + Math.sin(angle) * distance - 30;
       shield.style.left = shieldX + "px";
       shield.style.top = shieldY + "px";
       shield.style.transform = `rotate(${angle}rad)`;
@@ -235,18 +235,31 @@
         laser.y += laser.vy;
         laser.el.style.left = laser.x + "px";
         laser.el.style.top = laser.y + "px";
+
+        // Deflect laser if it hits shield
+        const shieldX = parseFloat(shield.style.left);
+        const shieldY = parseFloat(shield.style.top);
+        const shieldWidth = 6;
+        const shieldHeight = 60;
+
+        if (
+          laser.x < shieldX + shieldWidth &&
+          laser.x + 10 > shieldX &&
+          laser.y < shieldY + shieldHeight &&
+          laser.y + 10 > shieldY
+        ) {
+          laser.vx = -laser.vx;
+          laser.vy = -laser.vy;
+        }
+
+        // Hit player
         if (
           laser.x > playerX &&
           laser.x < playerX + 50 &&
           laser.y > playerY &&
           laser.y < playerY + 50
-        ) endGame();
-        if (
-          laser.x < 0 || laser.x > window.innerWidth ||
-          laser.y < 0 || laser.y > window.innerHeight
         ) {
-          laser.el.remove();
-          lasers.splice(index, 1);
+          endGame();
         }
       });
     }
@@ -256,7 +269,7 @@
         if (!chaser.active || !gameRunning) return;
         const dx = playerX - chaser.x;
         const dy = playerY - chaser.y;
-              const dist = Math.sqrt(dx * dx + dy * dy);
+        const dist = Math.sqrt(dx * dx + dy * dy);
         if (dist > 1) {
           chaser.x += (dx / dist) * 2;
           chaser.y += (dy / dist) * 2;
@@ -277,8 +290,8 @@
         // Collision with shield
         const shieldX = parseFloat(shield.style.left);
         const shieldY = parseFloat(shield.style.top);
-        const shieldWidth = 60;
-        const shieldHeight = 6;
+        const shieldWidth = 6;
+        const shieldHeight = 60;
 
         if (
           chaser.x < shieldX + shieldWidth &&
